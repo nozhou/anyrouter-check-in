@@ -24,7 +24,6 @@ wrangler login
 
 # 3. 写入密钥（不会进代码/git）
 wrangler secret put GITHUB_TOKEN   # 粘贴上面的 PAT
-wrangler secret put TRIGGER_KEY    # 随便设个口令，仅手动测试用
 
 # 4. 部署
 wrangler deploy
@@ -32,13 +31,13 @@ wrangler deploy
 
 ## 验证
 
-```bash
-# 手动触发一次（不用等到点），随后去 GitHub Actions 看是否出现新的 workflow_dispatch 运行
-curl "https://anyrouter-checkin-trigger.<你的子域>.workers.dev/?key=<你的TRIGGER_KEY>"
+纯定时触发器，无公网入口。本地干跑 cron 逻辑：
 
-# 本地干跑 cron 逻辑
+```bash
 wrangler dev --test-scheduled
-curl "http://localhost:8787/__scheduled?cron=17+*/8+*+*+*"
+curl "http://localhost:8787/__scheduled?cron=30+0+*+*+*"
 ```
+
+需要临时手动跑一次时，直接去 GitHub 仓库的 Actions 页面点 "Run workflow"（workflow_dispatch）。
 
 成本：Cloudflare 免费计划即含 Cron Triggers，这点调用量完全在免费额度内。

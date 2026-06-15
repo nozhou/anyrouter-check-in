@@ -2,10 +2,14 @@ name = "anyrouter-checkin-trigger"
 main = "src/index.js"
 compatibility_date = "2026-06-14"
 
-# 显式声明，消除部署告警并主动收敛暴露面
-workers_dev = true     # 保留 *.workers.dev 上的手动测试入口（?key= 触发）
-preview_urls = false   # 不需要 preview 部署的 URL，关闭
+# 纯定时触发器：不开任何公网 HTTP 入口（暴露面最小、无告警）
+workers_dev = false
 
 # Cloudflare Cron Trigger（UTC）。30 0 * * * → 每天 UTC 00:30 = 北京 08:30
 [triggers]
 crons = ["30 0 * * *"]
+
+# 持久化日志（Workers Logs）：可在 Dashboard 回看每次定时触发的执行记录
+[observability]
+enabled = true
+head_sampling_rate = 1   # 100% 采样；一天一次的触发量极小，不丢任何一条

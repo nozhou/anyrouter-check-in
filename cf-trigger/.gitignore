@@ -1,0 +1,7 @@
+# Cloudflare Wrangler 本地产物
+.wrangler/
+node_modules/
+
+# wrangler dev 的本地密钥文件，绝不入库
+.dev.vars
+.dev.vars.*

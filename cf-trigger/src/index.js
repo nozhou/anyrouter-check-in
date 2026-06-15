@@ -23,24 +23,22 @@ async function dispatch(env) {
 	);
 
 	// workflow_dispatch 成功返回 204 No Content（不是 200，也没有 body）
-	if (res.status !== 204) {
-		throw new Error(`dispatch failed: ${res.status} ${await res.text()}`);
+	if (res.status === 204) {
+		console.log('[checkin-trigger] ✅ 已触发 checkin.yml（HTTP 204）');
+	} else {
+		const body = await res.text();
+		console.error(`[checkin-trigger] ❌ 触发失败 HTTP ${res.status}: ${body}`);
+		throw new Error(`dispatch failed: ${res.status}`);
 	}
 }
 
 export default {
-	// Cron Trigger 到点调用
+	// 纯定时触发器：Cron Trigger 到点调用，无 HTTP 入口
 	async scheduled(event, env, ctx) {
+		// event.scheduledTime 是本次计划触发的毫秒时间戳，可对比看是否准时
+		console.log(
+			`[checkin-trigger] ⏰ Cron 触发 cron="${event.cron}" scheduledTime=${new Date(event.scheduledTime).toISOString()}`
+		);
 		ctx.waitUntil(dispatch(env));
-	},
-
-	// 可选：方便手动 curl 测试，用 ?key= 做最简单的保护
-	async fetch(req, env) {
-		const url = new URL(req.url);
-		if (!env.TRIGGER_KEY || url.searchParams.get('key') !== env.TRIGGER_KEY) {
-			return new Response('forbidden', { status: 403 });
-		}
-		await dispatch(env);
-		return new Response('dispatched\n');
 	},
 };
